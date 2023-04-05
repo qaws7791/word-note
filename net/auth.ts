@@ -38,4 +38,5 @@ export const logout = async ():Promise<void> => {
   return await signOut(auth);
 };
 
+
 export default auth;

@@ -1,28 +1,39 @@
 'use client'
-import React, { use } from 'react'
-import db, { createWord, getBook, getWord } from '@/net/db';
+import React from 'react'
+import db, { createWord, deleteWord, getBook } from '@/net/db';
 import { collection,onSnapshot,DocumentData, doc,getDoc } from 'firebase/firestore';
 import { useState,useEffect } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
-import { Button } from '@mui/material';
+import Box from '@mui/material/Box';
+import WordTable from '@/components/WordTable';
+import BasicSpeedDial from '@/components/BasicSpeedDial';
+import AddIcon from '@mui/icons-material/Add';
+import PlaylistRemoveIcon from '@mui/icons-material/PlaylistRemove';
+import { useTitleContext } from '@/context/TitleContext';
+import { useGridApiRef } from '@mui/x-data-grid';
 
 export default function BookPage({
   params
 }:{
-  params: {id:string};
+  params: {bookId:string};
 }) {
-  const {user, setUser} = useAuthContext();
-  const [words, setWords] = useState();
+  
+  const {user} = useAuthContext();
+  const {setTitle} = useTitleContext();
+  const apiRef = useGridApiRef();
+  const [words, setWords] = useState<DocumentData | undefined>();
   const [bookData, setBookData] = useState<DocumentData | undefined>();
-  const [selectedId, setSelectedId] = useState();
-
+  
+  useEffect(() => {
+    if(bookData){ setTitle(bookData.bookName)}
+  },[bookData])
 
   const addWord = async() => {
     try {
       const docRef = await createWord({
         spelling:"apple",
         meaning: "사과",
-        bookId: params.id
+        bookId: params.bookId
       })
       console.log("Document written with ID: ", docRef);
     } catch (e) {
@@ -30,16 +41,30 @@ export default function BookPage({
     }
   }
 
+  const deleteWords =async () => {
+    const wordIds =  apiRef.current.getSelectedRows();
+
+    wordIds.forEach((word, key) => {
+      console.log(word)
+      deleteWord({bookId:params.bookId, wordId:word.id})
+    })
+  
+    
+  }
+
   const getBookData = async () => {
-    const docRef = await getBook(params.id);
+    const docRef = await getBook(params.bookId);
     const docData =  await docRef.data();
     docData.id = docRef.id;
     setBookData(docData)
+    console.log(bookData)
   }
+
+  
 
   useEffect(() => {
     getBookData()
-    const unsubscribe = onSnapshot(collection(db, 'books',params.id,'words'), (querySnapshot) => {
+    const unsubscribe = onSnapshot(collection(db, 'books',params.bookId,'words'), (querySnapshot) => {
       const words = [];
       querySnapshot.forEach((word) => {
         const data = word.data()
@@ -53,16 +78,39 @@ export default function BookPage({
     return unsubscribe
   },[user])
 
+  useEffect(() => {
+    console.log(words)
+  },[words])
+
 
   return (
-    <div>
-      {bookData && bookData.bookName}
-      <WordDetail bookId={params.id} wordId={selectedId}/>
-      {words && words.map((word) => <li key={word.id} onClick={() => setSelectedId(word.id)}>{word.spelling}: {word.meaning}</li>)}
-      <Button onClick={addWord}>생성</Button>
-      </div>
+    <Box sx={{ width: '100%', bgcolor: 'background.paper',height:'100%'}}>
+
+      <Box sx={{
+      height:'85%',
+      position:'relative',
+      }}>
+        <WordTable rows={words} bookId={params.bookId} apiRef={apiRef}/>
+      </Box>
+
+      <Box sx={{
+        height:'15%',
+        position:'relative',
+      }}>
+        <BasicSpeedDial actions={[  
+        { icon: <AddIcon />, name: 'Add New Word',onClick: addWord },
+        { icon: <PlaylistRemoveIcon />, name: 'Delete Selected Words',onClick: deleteWords  }
+        ]}/>
+      </Box>
+    </Box>
   )
 }
+
+
+
+
+
+
 
 
 
