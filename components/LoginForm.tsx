@@ -1,6 +1,6 @@
 "use client";
 import { ReactElement } from "react";
-import { signIn } from "@/net/auth";
+import { signIn, signInWithGoogle } from "@/net/auth";
 import { useAuthContext } from "@/context/AuthContext";
 import { useRouter } from 'next/navigation';
 import NextLink from "next/link";
@@ -12,6 +12,8 @@ import Typography from "@mui/material/Typography/Typography";
 import TextField from "@mui/material/TextField/TextField";
 import Grid from '@mui/material/Grid';
 import Link from "@mui/material/Link";
+import Divider from '@mui/material/Divider';
+import GoogleButton from "./GoogleButton";
 
 
 export default function LoginForm(): ReactElement {
@@ -41,7 +43,7 @@ export default function LoginForm(): ReactElement {
   return (
     <Box
       sx={{
-        marginTop: 8,
+        marginTop: 2,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center'
@@ -78,6 +80,7 @@ export default function LoginForm(): ReactElement {
         type="submit"
         fullWidth
         variant="contained"
+        size="large"
         sx={{ mt: 3, mb: 2 }}
       >
         Sign In
@@ -88,8 +91,13 @@ export default function LoginForm(): ReactElement {
                   {"Don't have an account? Sign Up"}
                 </Link>
               </Grid>
-        </Grid>
+      </Grid>
+      <Divider sx={{margin:'20px 0px'}}>OR</Divider>
+      <GoogleButton onClick={signInWithGoogle}/>
+
+
     </Box>
     </Box>
   );
 }
+
