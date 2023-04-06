@@ -97,13 +97,22 @@ export const getWordData = async ({bookId,wordId}:{bookId:string, wordId:string}
 }
 
 export const updateWord = async({
-  bookId,wordId,spelling, meaning
+  bookId,
+  wordId,
+  spelling, 
+  meaning,
+  rating
 }:{
-  bookId:string, wordId:string, spelling: string, meaning: string
+  bookId:string, 
+  wordId:string, 
+  spelling: string, 
+  meaning: string,
+  rating: number
 }) => {
    await updateDoc(doc(db,'books',bookId,'words',wordId),{
     spelling,
-    meaning
+    meaning,
+    rating,
   });
   return getWordData({bookId,wordId})
 }
