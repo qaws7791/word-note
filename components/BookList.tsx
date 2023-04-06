@@ -6,6 +6,8 @@ export default function BookList({books}) {
 
   console.log(books)
 
+  if(!books || books.length < 1) return 'No Books'
+
 
   return (
     <List sx={{border: '1px solid #ddd', borderRadius: '6px'}}>
