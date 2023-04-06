@@ -58,10 +58,12 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
+import Avatar from '@mui/material/Avatar';
 import { useAuthContext } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { logout } from '@/net/auth';
 import { TitleContextProvider, useTitleContext } from '@/context/TitleContext';
+import Tooltip from '@mui/material/Tooltip';
 
 export function ButtonAppBar() {
   const {user} = useAuthContext();
@@ -102,10 +104,21 @@ export function ButtonAppBar() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             {title ? title : "App"}
           </Typography>
+
+          {
+          user &&
+          <Tooltip title={user?.displayName || user!.email!}>
+            <IconButton  sx={{ mr:1 }}>
+                  <Avatar alt={user?.displayName ? user.displayName : user!.email!} src={user?.photoURL || ''} />
+            </IconButton>
+          </Tooltip>
+          }
+
           {isLogin ? 
           <Button color="inherit" onClick={handleSignOut}>Logout</Button> 
           : 
-          <Button color="inherit" onClick={handleSignIn}>Login</Button>}
+          <Button color="inherit" onClick={handleSignIn}>Login</Button>
+          }
           
         </Toolbar>
       </AppBar>
