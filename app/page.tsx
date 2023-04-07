@@ -18,7 +18,7 @@ export default function Home() {
     setTitle('Home')
     console.log(title)
   })
-  if(user) redirect(`/${user.uid}`)
+  if(user) redirect(`/notes`)
 
   return (
       <LoginForm/>

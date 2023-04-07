@@ -11,7 +11,7 @@ import Button from '@mui/material/Button';
 import AddIcon from '@mui/icons-material/Add';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import { useRouter } from 'next/navigation';
 
 export default function BookForm() {
@@ -56,21 +56,38 @@ export default function BookForm() {
   return (
     <>
     <Box sx={{ width: '100%',position:'relative', bgcolor: 'background.paper', height:'100%'}}>
+    <Box sx={{
+        height:'85%',
+        position:'relative',
+      }}>
       <BookList books={books}/>
+
+      </Box>
+
+
+      <Box sx={{
+        height:'15%',
+        position:'relative',
+      }}>
+
+        <Tooltip title="New Note">
         <IconButton 
           size='large'
           aria-label="add" 
           onClick={handleAddBook}  
           sx={{ 
-          "&:hover": { backgroundColor: "#2c5da7" }, 
-          backgroundColor:'#3774cd',
-          position: 'absolute',
-          right: '8%',
-          bottom: '10%',
+            "&:hover": { backgroundColor: "#2c5da7" }, 
+            backgroundColor:'#3774cd',
+            position: 'absolute',
+            right: '5%',
+            bottom: '15%',
+            boxShadow: '0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12);'
           }}
-        >
+          >
           <AddIcon sx={{color: '#fff'}} fontSize="inherit"/>
         </IconButton>
+        </Tooltip>
+          </Box>
     </Box>
     </>
 

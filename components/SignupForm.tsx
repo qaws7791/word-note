@@ -32,7 +32,7 @@ export default function LoginForm(): ReactElement {
     try {
       const user = await signUp({ email, password });
       console.log("Signup Success", user.email);
-      router.push(`/${user.uid}`)
+      router.push(`/notes`)
     } catch (e: any) {
       console.log("Signup Error", e.message);
     }

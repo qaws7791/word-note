@@ -34,7 +34,7 @@ export default function LoginForm(): ReactElement {
       const user = await signIn({email, password});
       console.log('Login Success', user);
       setUser(user);
-      router.push(`/${user.uid}`)
+      router.push(`/notes`)
     } catch (e: any) {
       console.log('Login Error', e.message);
     }

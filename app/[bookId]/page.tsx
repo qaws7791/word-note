@@ -33,7 +33,8 @@ export default function BookPage({
       const docRef = await createWord({
         spelling:"apple",
         meaning: "사과",
-        bookId: params.bookId
+        bookId: params.bookId,
+        rating: 3,
       })
       console.log("Document written with ID: ", docRef);
     } catch (e) {
@@ -84,7 +85,8 @@ export default function BookPage({
 
 
   return (
-    <Box sx={{ width: '100%', bgcolor: 'background.paper',height:'100%'}}>
+    <>
+    <Box sx={{ width: '100%', bgcolor: 'background.paper',height:'100%',display:'relative'}}>
 
       <Box sx={{
       height:'85%',
@@ -102,7 +104,9 @@ export default function BookPage({
         { icon: <PlaylistRemoveIcon />, name: 'Delete Selected Words',onClick: deleteWords  }
         ]}/>
       </Box>
+
     </Box>
+    </>
   )
 }
 

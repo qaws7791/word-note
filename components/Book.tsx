@@ -32,7 +32,7 @@ export default function Book({data}) {
 
   return(
     <ListItem disablePadding>
-      <ListItemButton component={Link} href={`/${user.uid}/${data.id}`}>
+      <ListItemButton component={Link} href={`/${data.id}`}>
         <ListItemText primary={data.bookName} sx={{textAlign: 'center'}}/>
       </ListItemButton>
       <BookMenu handleDeleteBook={handleDeleteBook} setDialogOpen={setDialogOpen} />
