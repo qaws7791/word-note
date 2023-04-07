@@ -35,6 +35,7 @@ interface CreateWordParams {
   spelling: string;
   meaning: string;
   bookId: string;
+  rating: number;
 
 }
 
@@ -63,10 +64,11 @@ export const getBooksAll = async({uid}: GetBooksAllParams):Promise<QuerySnapshot
   return await getDocs(query( collection(db, 'books'),where("uid", "==",uid)))
 }
 
-export const createWord = async ({spelling, meaning,bookId}:CreateWordParams):Promise<DocumentReference> => {
+export const createWord = async ({spelling, meaning,bookId,rating}:CreateWordParams):Promise<DocumentReference> => {
   return await addDoc(collection(db, 'books',bookId,'words'), {
     spelling,
     meaning,
+    rating,
     created_at: new Date().getTime(),
   });
 }
