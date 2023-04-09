@@ -17,6 +17,9 @@ import Tooltip from '@mui/material/Tooltip';
 export default function ProfileAppBar() {
   const {user} = useAuthContext();
   const {title} = useTitleContext();
+  const [isOpenDrawer, setIsOpenDrawer] = React.useState(false);
+
+
 
   const isLogin = user ? true: false;
   const router = useRouter();
@@ -37,6 +40,25 @@ export default function ProfileAppBar() {
   }
 
 
+  const onKeyDownDrawer = (event: React.KeyboardEvent | React.MouseEvent) => {
+    if (
+      event.type === "keydown" &&
+      ((event as React.KeyboardEvent).key === "Tab" ||
+        (event as React.KeyboardEvent).key === "Shift")
+    ) {
+      return;
+    }
+    setIsOpenDrawer(true);
+  };
+
+  const onOpenDrawer = (e) => {
+    setIsOpenDrawer(true);
+  };
+
+  const onCloseDrawer = (e) => {
+    setIsOpenDrawer(false);
+  };
+
   return (
     <Box sx={{ position:'fiexed', width:'100%' }}>
       <AppBar position="static">
@@ -47,6 +69,7 @@ export default function ProfileAppBar() {
             color="inherit"
             aria-label="menu"
             sx={{ mr: 2 }}
+            onClick={onOpenDrawer}
           >
             <MenuIcon />
           </IconButton>
@@ -71,6 +94,53 @@ export default function ProfileAppBar() {
           
         </Toolbar>
       </AppBar>
+      <AppBarDrawer open={isOpenDrawer} onClose={onCloseDrawer} onKeyDown={onKeyDownDrawer}/>
     </Box>
   );
+}
+
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import PersonIcon from '@mui/icons-material/Person';
+import BookIcon from '@mui/icons-material/Book';
+
+export function AppBarDrawer({open, onClose, onKeyDown}) {
+
+  const router = useRouter();
+
+  const pushPage = (url) => router.push(`${url}`)
+
+  return(
+    <Drawer anchor={'left'} open={open} onClose={onClose}>
+      <Box
+        sx={{ width: 250 }}
+        role="presentation"
+        onClick={onClose}
+        onKeyDown={onKeyDown}
+      >
+        <List>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => pushPage('/profile')}>
+              <ListItemIcon>
+                  <PersonIcon />
+              </ListItemIcon>
+              <ListItemText primary={"프로필"} />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => pushPage('/notes')}>
+              <ListItemIcon>
+                  <BookIcon />
+              </ListItemIcon>
+              <ListItemText primary={"노트"} />
+            </ListItemButton>
+          </ListItem>
+        </List>
+      </Box>
+    </Drawer>
+  )
 }

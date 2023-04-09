@@ -41,6 +41,7 @@ export default function RootLayout({
             <Box sx={{padding:1,height: `100%`,border:'0px solid red',position:'relative'}}>
             {children}
             </Box>
+            
             <CssBaseline/>
           </Container>
           </TitleContextProvider>

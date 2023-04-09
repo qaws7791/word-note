@@ -16,8 +16,7 @@ export default function Home() {
 
   useEffect(() => {
     setTitle('Home')
-    console.log(title)
-  })
+  },[])
   if(user) redirect(`/notes`)
 
   return (

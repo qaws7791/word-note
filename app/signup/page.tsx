@@ -13,7 +13,7 @@ export default function SignupPage() {
     setTitle('Sign up')
   })
 
-  if(user) {redirect('/')}
+  if(user) return redirect('/')
 
   return (
     <SignupForm/>

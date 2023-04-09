@@ -15,7 +15,7 @@ export default function LoginPage() {
     setTitle('Sign in')
   })
 
-  if(user) {redirect('/')}
+  if(user) return redirect('/')
 
   return (
   <LoginForm/>

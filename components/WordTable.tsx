@@ -8,8 +8,6 @@ import {
   GridToolbarQuickFilter,
   GridRenderCellParams,
   useGridApiContext,
-  gridFilteredSortedRowIdsSelector,
-  getSortedRows
 } from '@mui/x-data-grid';
 import { updateWord } from '@/net/db';
 import Alert, { AlertProps } from "@mui/material/Alert";
@@ -56,32 +54,6 @@ const renderRatingEditInputCell: GridColDef['renderCell'] = (params) => {
   return <RatingEditInputCell {...params} />;
 };
 
-const columns: GridColDef[] = [
-  { 
-    field: 'spelling', 
-    headerName: '단어', 
-    description: '설명할 단어',
-    width: 130, 
-    editable: true 
-  },
-  { 
-    field: 'meaning', 
-    headerName: '설명',
-    description:'단어에 대한 뜻이나 설명', 
-    width: 130,
-    editable: true 
-  },
-  {
-    field: 'rating',
-    headerName: '난이도',
-    description:'난이도',
-    renderCell: renderRating,
-    renderEditCell: renderRatingEditInputCell,
-    editable: true,
-    width: 150,
-    type: 'number',
-  },
-];
 
 // const rows = [
 // {created_at: 1680541319787,id:"18QftO3OuZvRAE3QHCAv", meaning: "사과", spelling: "apple"},
@@ -95,6 +67,7 @@ export default function WordTable({rows,bookId,apiRef}) {
   AlertProps,
   "children" | "severity"
 > | null>(null);(null);
+const [ columns,setColumns ] = useState<GridColDef[]>([])
 
   const handleCloseSnackbar = () => setSnackbar(null);
 
@@ -126,20 +99,44 @@ export default function WordTable({rows,bookId,apiRef}) {
     // const allRows = apiRef.current.getSortedRows(apiRef)
     // console.log(Rows)
     // console.log(allRows)
-  })
-
-  useEffect(() => {
-    addColumn(  {
-      field: "change",
-      headerName: "수정",
-      width: 90,
-      renderCell: (params) => {
-        console.log('params:',params)
-        return <Button variant='outlined' onClick={(e)=>setIsOpenModal(params.row)}>수정</Button>
-      } 
-    })
-    console.log(columns)
+    setColumns([
+      { 
+        field: 'spelling', 
+        headerName: '단어', 
+        description: '설명할 단어',
+        width: 130, 
+        editable: true 
+      },
+      { 
+        field: 'meaning', 
+        headerName: '설명',
+        description:'단어에 대한 뜻이나 설명', 
+        width: 130,
+        editable: true 
+      },
+      {
+        field: 'rating',
+        headerName: '난이도',
+        description:'난이도',
+        renderCell: renderRating,
+        renderEditCell: renderRatingEditInputCell,
+        editable: true,
+        width: 150,
+        type: 'number',
+      },
+      {
+        field: "change",
+        headerName: "수정",
+        width: 90,
+        renderCell: (params) => {
+          console.log('params:',params)
+          return <Button variant='outlined' onClick={(e)=>setIsOpenModal(params.row)}>수정</Button>
+        } 
+      }
+    ])
   },[])
+
+
 
   const handleModalClose = () => {
     setIsOpenModal(null)
@@ -379,7 +376,15 @@ export function FullScreenDialog({
             onChange={onChangeMeaningInput}
           />
           <Divider sx={{my: 4}}/>
+          <Box sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
           <Rating  name='rating' value={ratingInput} onChange={(event,newValue)=>setRatingInput(newValue)}/>
+          {ratingInput !== null && (<Box sx={{ ml: 2 }}>{ratingInput}점</Box>)}
+          </Box>
+          
           <Grid container spacing={2} sx={{mt:3}}>
             <Grid item xs={6}>
               <Button variant='contained' fullWidth onClick={e=>handlePrevWord()} startIcon={<NavigateBeforeIcon/>}>Prev</Button>

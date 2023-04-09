@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 import { Box } from "@mui/material";
 import { updateProfile } from 'firebase/auth';
 import TextField from "@mui/material/TextField/TextField";
-
+import { convertBytesToString } from '@/utils/common';
 // 1. 처음 렌더링 -> 입력된 image가 없음 (imageUpload === null)
 // 1.1 기존 photoURL이 존재함(user.photoURL !== null) -> photoURL로 img 표시
 // 1.2 기존 photoURL이 없음(user.photoURL === null) -> defaultImage로 img 표시
@@ -23,8 +23,7 @@ import TextField from "@mui/material/TextField/TextField";
 
 
 
-const KB = 1024;
-const MB = 1024**2
+
 
 export default function ProfilePage() {
   const {user} = useAuthContext();
@@ -36,18 +35,10 @@ export default function ProfilePage() {
   "children" | "severity"
 > | null>(null);(null);
 
-const convertbitToMb = (bytes) => {
-  const size_KB = bytes / KB;
-  const size_MB = bytes / MB;
 
-  if(size_MB > 1 ) return Math.ceil(size_MB * 1000) / 1000 +"MB";
-  return Math.ceil(size_KB * 1000) / 1000 +"KB";
-}
+  const handleCloseSnackbar = ():void => setSnackbar(null);
 
-
-  const handleCloseSnackbar = () => setSnackbar(null);
-
-  const handleChangeInputImage = (file:File) => {
+  const onChangeInputImage = (file:File):void => {
     if(!file) return
 
     if(file.size > 5_000_000) {
@@ -56,35 +47,28 @@ const convertbitToMb = (bytes) => {
     }
     setImageUpload(file);
     setShouldResetURL(false);
-    setSnackbar({ children: "이미지를 성공적으로 불러왔습니다.", severity: "success" });
+    setSnackbar({ children: "이미지를 성공적으로 불러왔습니다.", severity: "info" });
   } 
 
-  const handleUpload = async() => {
-    if(imageUpload == null) return user?.photoURL;
-    const result = await uploadImage(imageUpload)
-    return result
-  }
 
-  const handleSubmit = async(event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async(event: React.FormEvent<HTMLFormElement>):Promise<void> => {
     event.preventDefault()
     if (!user) return
     const NewUser = { displayName: user.displayName, photoURL: user.photoURL};
     if(shouldResetURL) NewUser.photoURL = '';
-    if(imageUpload) await uploadImage(imageUpload).then((url) => {console.log(url); NewUser.photoURL = url});
+    if(imageUpload) await uploadImage(imageUpload).then((url) => NewUser.photoURL = url);
     if(displayName !== user.displayName) NewUser.displayName = displayName;
     console.log(NewUser)
     await updateProfile(user,NewUser).then(() => {
-      // Profile updated!
-      // ...
-      console.log("Profile updated!")
-      console.log(user)
+      console.log("Profile updated!",user)
+      setSnackbar({ children: "성공적으로 프로필을 변경했습니다.", severity: "success" });
     }).catch((error) => {
-      // An error occurred
-      // ...
+      console.error('error: ',error)
+      setSnackbar({ children: `error: ${error}`, severity: "error" });
     });
   }
 
-  const loadDefaultImage = async() => {
+  const loadDefaultImage = async():Promise<void> => {
     const blob =await downloadDefaultProfileImage()
     const reader = new FileReader();
     reader.readAsDataURL(blob);
@@ -93,7 +77,7 @@ const convertbitToMb = (bytes) => {
     });
   }
 
-  const resetToDefaultImage = () => {
+  const resetToDefaultImage = ():void => {
     setImageUpload(null); 
     setShouldResetURL(true)
   }
@@ -101,10 +85,9 @@ const convertbitToMb = (bytes) => {
   useEffect(() => {
     if(user?.displayName) {setDisplayName(user?.displayName)}
     if(user && !user.photoURL) {
-      console.log('프로필 이미지가 없습니다.')
-      loadDefaultImage()
+      console.log('프로필 이미지가 없습니다.') 
     }
-    
+    loadDefaultImage()
   },[])
 
   const imageURL = imageUpload 
@@ -112,10 +95,6 @@ const convertbitToMb = (bytes) => {
    user?.photoURL && !shouldResetURL 
   ? user?.photoURL :  localStorage.getItem('defaultProfile');
   
-
-  useEffect(() => {
-    console.log(imageURL)
-  })
 
   
   return (
@@ -125,13 +104,13 @@ const convertbitToMb = (bytes) => {
     {<img src={`${imageURL}`} width={200} height={200} />}
       <Button variant="outlined" component='label'>
         {imageUpload ? '이미지 변경' : '이미지 선택'}
-        <input hidden accept="image/*" type="file" onChange={(event) => {console.log(event); handleChangeInputImage(event.target.files[0])}} />
+        <input hidden accept="image/*" type="file" onChange={(event) => {console.log(event); onChangeInputImage(event.target.files[0])}} />
       </Button>
       <Button variant="outlined" onClick={resetToDefaultImage}>
         기본 이미지 사용
       </Button>
       <Typography>file: {imageUpload ? imageUpload.name :" "}</Typography>
-      <Typography>size: {imageUpload ? convertbitToMb(imageUpload.size) :" "}</Typography>
+      <Typography>size: {imageUpload ? convertBytesToString(imageUpload.size) :" "}</Typography>
       <TextField
         margin="normal"
         required
