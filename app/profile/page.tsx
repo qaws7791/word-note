@@ -1,143 +1,245 @@
 "use client"
-import React,{useState,useEffect} from 'react'
-import Button from '@mui/material/Button';
-import Stack from '@mui/material/Stack';
-import { downloadDefaultProfileImage, uploadImage } from '@/net/storage';
-import Alert, { AlertProps } from "@mui/material/Alert";
-import Snackbar from "@mui/material/Snackbar";
-import { useAuthContext } from '@/context/AuthContext';
-import Typography from '@mui/material/Typography';
-import { Box } from "@mui/material";
-import { updateProfile } from 'firebase/auth';
-import TextField from "@mui/material/TextField/TextField";
-import { convertBytesToString } from '@/utils/common';
-// 1. 처음 렌더링 -> 입력된 image가 없음 (imageUpload === null)
-// 1.1 기존 photoURL이 존재함(user.photoURL !== null) -> photoURL로 img 표시
-// 1.2 기존 photoURL이 없음(user.photoURL === null) -> defaultImage로 img 표시
-
-// 2. image를 선택함 (imageUpload !== null) -> setShouldResetURL(false) src=URL.createObjectURL(imageUpload)로 이미지 표시
-
-// 3. 원래대로 버튼 클릭 -> 입력된 이미지 삭제 (setImageUpload(null)) -> 1.으로 돌아감
-
-// 4. 프로필 이미지 지우기 버튼 클릭 - 입력된 이미지 삭제(setImageUpload(null)) 및 photoURL 삭제(setShouldResetURL = true)
-
-
-
-
+import { useAuthContext } from '@/context/AuthContext'
+import React,{use, useEffect, useState} from 'react'
+import db, { getBooksAll } from '@/net/db';
+import { getCountFromServer, query, where } from 'firebase/firestore';
+import { collection } from 'firebase/firestore';
+const WEEK = 7 * 24 * 60 * 60 * 1000;
+const DAY =  1 * 60 * 60 * 1000;
 
 export default function ProfilePage() {
   const {user} = useAuthContext();
-  const [imageUpload, setImageUpload] = useState<File | null>(null);
-  const [shouldResetURL,setShouldResetURL] = useState<boolean>(false)
-  const [displayName, setDisplayName] = useState<string>('');
-  const [snackbar, setSnackbar] = React.useState<Pick<
-  AlertProps,
-  "children" | "severity"
-> | null>(null);(null);
+  const [ books,setBooks] = useState([]);
+  const [totalWordNumber, setTotalWordNumber] = useState(0);
+  const [totalBananaNumber, setTotalBananaNumber] = useState(0);
 
-
-  const handleCloseSnackbar = ():void => setSnackbar(null);
-
-  const onChangeInputImage = (file:File):void => {
-    if(!file) return
-
-    if(file.size > 5_000_000) {
-      setSnackbar({ children: "5MB 이하의 이미지만 선택할 수 있습니다. ", severity: "error" });
-      return
-    }
-    setImageUpload(file);
-    setShouldResetURL(false);
-    setSnackbar({ children: "이미지를 성공적으로 불러왔습니다.", severity: "info" });
-  } 
-
-
-  const handleSubmit = async(event: React.FormEvent<HTMLFormElement>):Promise<void> => {
-    event.preventDefault()
-    if (!user) return
-    const NewUser = { displayName: user.displayName, photoURL: user.photoURL};
-    if(shouldResetURL) NewUser.photoURL = '';
-    if(imageUpload) await uploadImage(imageUpload).then((url) => NewUser.photoURL = url);
-    if(displayName !== user.displayName) NewUser.displayName = displayName;
-    console.log(NewUser)
-    await updateProfile(user,NewUser).then(() => {
-      console.log("Profile updated!",user)
-      setSnackbar({ children: "성공적으로 프로필을 변경했습니다.", severity: "success" });
-    }).catch((error) => {
-      console.error('error: ',error)
-      setSnackbar({ children: `error: ${error}`, severity: "error" });
+  const loadBooks = async(uid) => {
+    const newBooks = [];
+    console.log('start')
+    const querySnapshot  = await getBooksAll({uid:uid})
+    console.log(querySnapshot)
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      data.id = doc.id;
+      // doc.data() is never undefined for query doc snapshots
+      newBooks.push(data);
     });
+    console.log(newBooks)
+    setBooks(newBooks)
   }
 
-  const loadDefaultImage = async():Promise<void> => {
-    const blob =await downloadDefaultProfileImage()
-    const reader = new FileReader();
-    reader.readAsDataURL(blob);
-    reader.addEventListener('load', () => {
-      localStorage.setItem('defaultProfile', reader.result);
-    });
+  const getLastWeek = () => {
+    return new Date().getTime() - WEEK;    
   }
 
-  const resetToDefaultImage = ():void => {
-    setImageUpload(null); 
-    setShouldResetURL(true)
+  const getLastDay = () => {
+    return new Date().getTime() - DAY;    
   }
 
   useEffect(() => {
-    if(user?.displayName) {setDisplayName(user?.displayName)}
-    if(user && !user.photoURL) {
-      console.log('프로필 이미지가 없습니다.') 
-    }
-    loadDefaultImage()
+    if (!user) return
+    loadBooks(user.uid)
+    
   },[])
 
-  const imageURL = imageUpload 
-  ? URL.createObjectURL(imageUpload) :
-   user?.photoURL && !shouldResetURL 
-  ? user?.photoURL :  localStorage.getItem('defaultProfile');
+  useEffect(() => {
+    if(books) {
+      printTotalWord()
+      printLastWeekWord()
+    }
+  },[books])
+
+
+  useEffect(() => {
+    console.log(totalWordNumber)
+  },[totalWordNumber])
   
 
-  
-  return (
-    <>
-    <Box component="form" onSubmit={handleSubmit} noValidate sx={{mt: 1}}>
-    <Stack direction="column" alignItems="center" spacing={2}>
-    {<img src={`${imageURL}`} width={200} height={200} />}
-      <Button variant="outlined" component='label'>
-        {imageUpload ? '이미지 변경' : '이미지 선택'}
-        <input hidden accept="image/*" type="file" onChange={(event) => {console.log(event); onChangeInputImage(event.target.files[0])}} />
-      </Button>
-      <Button variant="outlined" onClick={resetToDefaultImage}>
-        기본 이미지 사용
-      </Button>
-      <Typography>file: {imageUpload ? imageUpload.name :" "}</Typography>
-      <Typography>size: {imageUpload ? convertBytesToString(imageUpload.size) :" "}</Typography>
-      <TextField
-        margin="normal"
-        required
-        id="displayName"
-        label="displayName"
-        name="displayName"
-        autoFocus
-        value={displayName}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-          setDisplayName(event.target.value);
+
+  const printTotalWord = async () => {
+
+    if(!books) {
+      console.log('no books') 
+      return 
+    }
+    let sum  = 0;
+    //map,foreach,reduce x
+    // await books.map( async(doc) => {
+    //   const coll = collection(db,'books',doc.id,'words');
+    //   const snapshot = await getCountFromServer(coll);
+    //   const count =  snapshot.data().count;
+    //   console.log('count: ', count);
+    //   sum += count;
+    //   console.log(sum)
+    // })
+
+    //비동기 기다림
+    for await ( const book of books) {
+      const coll = collection(db,'books',book.id,'words');
+      const snapshot = await getCountFromServer(coll);
+      const count =  snapshot.data().count;
+      console.log('count: ', count);
+      sum += count;
+      console.log(sum)
+    }
+    
+    setTotalWordNumber(sum)
+
+  }
+
+  const printLastWeekWord = async () => {
+
+    if(!books) {
+      console.log('no books') 
+      return 
+    }
+    let sum  = 0;
+    //map,foreach,reduce x
+    // await books.map( async(doc) => {
+    //   const coll = collection(db,'books',doc.id,'words');
+    //   const snapshot = await getCountFromServer(coll);
+    //   const count =  snapshot.data().count;
+    //   console.log('count: ', count);
+    //   sum += count;
+    //   console.log(sum)
+    // })
+
+    //비동기 기다림
+    for await ( const book of books) {
+      const coll = collection(db,'books',book.id,'words');
+      const lastWeek = getLastWeek();
+      const q = query(coll,where("created_at",">=",lastWeek))
+      const snapshot = await getCountFromServer(q);
+      const count =  snapshot.data().count;
+      console.log('count: ', count);
+      sum += count;
+      console.log(sum)
+    }
+    
+    setTotalBananaNumber(sum)
+
+  }
+
+  return (<>
+  <Grid container spacing={2}>
+    <Grid item xs={12} md={6}>
+      <Paper
+        sx={{
+          p: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          height: 240,
         }}
-      />
-      <Button variant='contained' type="submit">save profile</Button>
+      >
+        <Item 
+        title={'지금까지 내가 저장한 단어는?'} 
+        content={`${totalWordNumber} 개`}
+        hint={'더 많은 단어를 저장 해 보세요!'}
+        linkTitle={'단어장으로 이동'}
+        />
+      </Paper>
+    </Grid>
+    <Grid item xs={12} md={6}>
+      <Paper
+        sx={{
+          p: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          height: 240,
+        }}
+      >
+        <Item 
+        title={'최근 일주일간 저장한 단어는?'} 
+        content={`${totalBananaNumber} 개`}
+        hint={'더 많은 단어를 저장 해 보세요!'}
+        linkTitle={'단어장으로 이동'}
+        />
+      </Paper>
+    </Grid>
+    <Grid item xs={12} md={6}>
+      <Paper
+        sx={{
+          p: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          height: 240,
+        }}
+      >
+        <Item 
+        title={'내가 저장한 단어'} 
+        content={`${totalWordNumber} 개`}
+        hint={'더 많은 단어를 저장 해 보세요!'}
+        linkTitle={'단어장으로 이동'}
+        />
+      </Paper>
+    </Grid>
+    <Grid item xs={12} md={6}>
+      <Paper
+        sx={{
+          p: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          height: 240,
+        }}
+      >
+        <Item 
+        title={'내가 저장한 단어'} 
+        content={`${totalWordNumber} 개`}
+        hint={'더 많은 단어를 저장 해 보세요!'}
+        linkTitle={'단어장으로 이동'}
+        />
+      </Paper>
+    </Grid>
+  </Grid>
 
-      
-    </Stack>
-    </Box>
-    {!!snackbar && (
-        <Snackbar
-          open
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          onClose={handleCloseSnackbar}
-          autoHideDuration={6000}
-        >
-          <Alert {...snackbar} onClose={handleCloseSnackbar} />
-        </Snackbar>
-      )}
     </>
   )
+}
+
+import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
+import Link from '@/components/Link';
+
+function preventDefault(event: React.MouseEvent) {
+  event.preventDefault();
+}
+
+
+
+export function Item({title,content,hint,linkTitle}) {
+
+  const onClickLink = () => {
+  
+  }
+
+  return (
+    <React.Fragment>
+      <Title>{title}</Title>
+      <Typography component="p" variant="h4">
+        {content}
+      </Typography>
+      <Typography color="text.secondary" sx={{ flex: 1 }}>
+        {hint}
+      </Typography>
+      <div>
+        <Link color="primary" href="/notes">
+          {linkTitle}
+        </Link>
+      </div>
+    </React.Fragment>
+  );
+}
+
+import Typography from '@mui/material/Typography';
+
+interface TitleProps {
+  children?: React.ReactNode;
+}
+
+export function Title(props: TitleProps) {
+  return (
+    <Typography component="h2" variant="h6" color="primary" gutterBottom>
+      {props.children}
+    </Typography>
+  );
 }
