@@ -1,6 +1,6 @@
 import './googleButton.css';
 
-export default function GoogleButton({onClick}) {
+export default function GoogleButton({onClick}:{onClick:React.MouseEventHandler<HTMLDivElement>}) {
   return (
     <div className="gBtn" onClick={onClick} style={{width:'100%'}}>
       <div className="gBtnWrapper">

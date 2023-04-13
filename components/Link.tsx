@@ -1,6 +1,6 @@
 import * as React from 'react';
 import clsx from 'clsx';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import NextLink, { LinkProps as NextLinkProps } from 'next/link';
 import MuiLink, { LinkProps as MuiLinkProps } from '@mui/material/Link';
 import { styled } from '@mui/material/styles';
@@ -78,8 +78,9 @@ const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(props,
 
   const router = useRouter();
   const pathname = typeof href === 'string' ? href : href.pathname;
+  const currentPath = usePathname();
   const className = clsx(classNameProps, {
-    [activeClassName]: router.pathname === pathname && activeClassName,
+    [activeClassName]: currentPath === pathname && activeClassName,
   });
 
   const isExternal =

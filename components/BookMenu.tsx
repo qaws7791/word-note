@@ -7,7 +7,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 
-export default function BookMenu({handleDeleteBook, setDialogOpen}) {
+export default function BookMenu({handleDeleteBook, setDialogOpen}:{handleDeleteBook:React.MouseEventHandler<HTMLElement>,setDialogOpen:Function}) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {

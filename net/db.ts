@@ -101,9 +101,9 @@ export const updateWord = async({
 }:{
   bookId:string, 
   wordId:string, 
-  spelling: string, 
-  meaning: string,
-  rating: number
+  spelling: string | undefined, 
+  meaning: string | undefined,
+  rating: number | undefined
 }) => {
    await updateDoc(doc(db,'books',bookId,'words',wordId),{
     spelling,

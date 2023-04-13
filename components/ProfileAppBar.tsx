@@ -30,8 +30,8 @@ export default function ProfileAppBar() {
       await logout();
       console.log("Logout Success");
       router.push('/')
-    } catch (e) {
-      console.log("Logout error: ", e.message);
+    } catch (error) {
+      console.log("Logout error: ", getErrorMessage(error));
     }
   };
 
@@ -51,11 +51,11 @@ export default function ProfileAppBar() {
     setIsOpenDrawer(true);
   };
 
-  const onOpenDrawer = (e) => {
+  const onOpenDrawer = () => {
     setIsOpenDrawer(true);
   };
 
-  const onCloseDrawer = (e) => {
+  const onCloseDrawer = () => {
     setIsOpenDrawer(false);
   };
 
@@ -99,7 +99,7 @@ export default function ProfileAppBar() {
   );
 }
 
-import Drawer from "@mui/material/Drawer";
+import Drawer, { DrawerProps } from "@mui/material/Drawer";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -107,12 +107,21 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import PersonIcon from '@mui/icons-material/Person';
 import BookIcon from '@mui/icons-material/Book';
+import { getErrorMessage } from '@/utils/common';
 
-export function AppBarDrawer({open, onClose, onKeyDown}) {
+export function AppBarDrawer({
+  open, 
+  onClose, 
+  onKeyDown
+}:{
+  open:boolean,
+  onClose:(() => void),
+  onKeyDown:(event: React.KeyboardEvent | React.MouseEvent)=>void
+}) {
 
   const router = useRouter();
 
-  const pushPage = (url) => router.push(`${url}`)
+  const pushPage = (url:string) => router.push(`${url}`)
 
   return(
     <Drawer anchor={'left'} open={open} onClose={onClose}>

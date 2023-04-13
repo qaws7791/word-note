@@ -1,5 +1,5 @@
 "use client"
-import React,{useState,useEffect} from 'react'
+import React,{useState,useEffect, ReactEventHandler, ChangeEvent} from 'react'
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import { downloadDefaultProfileImage, uploadImage } from '@/net/storage';
@@ -73,7 +73,7 @@ export default function ProfileEditPage() {
     const reader = new FileReader();
     reader.readAsDataURL(blob);
     reader.addEventListener('load', () => {
-      localStorage.setItem('defaultProfile', reader.result);
+      localStorage.setItem('defaultProfile', reader.result as string);
     });
   }
 
@@ -94,6 +94,12 @@ export default function ProfileEditPage() {
   ? URL.createObjectURL(imageUpload) :
    user?.photoURL && !shouldResetURL 
   ? user?.photoURL :  localStorage.getItem('defaultProfile');
+
+  const onChangeImage = (event:React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      onChangeInputImage(event.target.files[0])
+    }
+  }
   
 
   
@@ -104,7 +110,7 @@ export default function ProfileEditPage() {
     {<img src={`${imageURL}`} width={200} height={200} />}
       <Button variant="outlined" component='label'>
         {imageUpload ? '이미지 변경' : '이미지 선택'}
-        <input hidden accept="image/*" type="file" onChange={(event) => {console.log(event); onChangeInputImage(event.target.files[0])}} />
+        <input hidden accept="image/*" type="file" onChange={onChangeImage} />
       </Button>
       <Button variant="outlined" onClick={resetToDefaultImage}>
         기본 이미지 사용

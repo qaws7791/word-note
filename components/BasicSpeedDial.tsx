@@ -4,9 +4,14 @@ import SpeedDial from '@mui/material/SpeedDial';
 import SpeedDialIcon from '@mui/material/SpeedDialIcon';
 import SpeedDialAction from '@mui/material/SpeedDialAction';
 
+interface Actions {
+  icon: JSX.Element
+  name: string
+  onClick: React.MouseEventHandler<HTMLDivElement>
+}
 
 
-export default function BasicSpeedDial({actions}) {
+export default function BasicSpeedDial({actions}:{actions:Actions[]}) {
   return (
       <SpeedDial
         ariaLabel="SpeedDial basic example"

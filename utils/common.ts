@@ -8,3 +8,8 @@ export const convertBytesToString = (bytes:number):string => {
   if(size_MB > 1 ) return Math.ceil(size_MB * 1000) / 1000 +"MB";
   return Math.ceil(size_KB * 1000) / 1000 +"KB";
 }
+
+export const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}

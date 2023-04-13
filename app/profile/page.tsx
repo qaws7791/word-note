@@ -2,24 +2,28 @@
 import { useAuthContext } from '@/context/AuthContext'
 import React,{use, useEffect, useState} from 'react'
 import db, { getBooksAll } from '@/net/db';
-import { getCountFromServer, query, where } from 'firebase/firestore';
+import { DocumentData, getCountFromServer, query, where } from 'firebase/firestore';
 import { collection } from 'firebase/firestore';
 const WEEK = 7 * 24 * 60 * 60 * 1000;
 const DAY =  1 * 60 * 60 * 1000;
 
+interface Book extends DocumentData {
+  id?: string
+}
+
 export default function ProfilePage() {
   const {user} = useAuthContext();
-  const [ books,setBooks] = useState([]);
+  const [ books,setBooks] = useState<Book[]>([]);
   const [totalWordNumber, setTotalWordNumber] = useState(0);
   const [totalBananaNumber, setTotalBananaNumber] = useState(0);
 
-  const loadBooks = async(uid) => {
-    const newBooks = [];
+  const loadBooks = async(uid:string) => {
+    const newBooks:Book[] = [];
     console.log('start')
     const querySnapshot  = await getBooksAll({uid:uid})
     console.log(querySnapshot)
     querySnapshot.forEach((doc) => {
-      const data = doc.data();
+      const data:Book = doc.data();
       data.id = doc.id;
       // doc.data() is never undefined for query doc snapshots
       newBooks.push(data);
@@ -75,7 +79,7 @@ export default function ProfilePage() {
 
     //비동기 기다림
     for await ( const book of books) {
-      const coll = collection(db,'books',book.id,'words');
+      const coll = collection(db,'books',book.id as string,'words');
       const snapshot = await getCountFromServer(coll);
       const count =  snapshot.data().count;
       console.log('count: ', count);
@@ -106,7 +110,7 @@ export default function ProfilePage() {
 
     //비동기 기다림
     for await ( const book of books) {
-      const coll = collection(db,'books',book.id,'words');
+      const coll = collection(db,'books',book.id as string,'words');
       const lastWeek = getLastWeek();
       const q = query(coll,where("created_at",">=",lastWeek))
       const snapshot = await getCountFromServer(q);
@@ -204,16 +208,27 @@ function preventDefault(event: React.MouseEvent) {
   event.preventDefault();
 }
 
+interface ItemProps {
+  title: string;
+  content: string;
+  hint: string;
+  linkTitle: string;
+}
 
 
-export function Item({title,content,hint,linkTitle}) {
+function Item({
+  title,
+  content,
+  hint,
+  linkTitle
+}:ItemProps) {
 
   const onClickLink = () => {
   
   }
 
   return (
-    <React.Fragment>
+    <>
       <Title>{title}</Title>
       <Typography component="p" variant="h4">
         {content}
@@ -226,17 +241,15 @@ export function Item({title,content,hint,linkTitle}) {
           {linkTitle}
         </Link>
       </div>
-    </React.Fragment>
+    </>
   );
 }
 
-import Typography from '@mui/material/Typography';
+import Typography, { TypographyProps } from '@mui/material/Typography';
 
-interface TitleProps {
-  children?: React.ReactNode;
-}
+interface TitleProps extends TypographyProps {}
 
-export function Title(props: TitleProps) {
+function Title(props: TitleProps) {
   return (
     <Typography component="h2" variant="h6" color="primary" gutterBottom>
       {props.children}

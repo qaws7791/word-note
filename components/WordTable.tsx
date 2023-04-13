@@ -8,6 +8,7 @@ import {
   GridToolbarQuickFilter,
   GridRenderCellParams,
   useGridApiContext,
+  GridValidRowModel,
 } from '@mui/x-data-grid';
 import { updateWord } from '@/net/db';
 import Alert, { AlertProps } from "@mui/material/Alert";
@@ -61,8 +62,25 @@ const renderRatingEditInputCell: GridColDef['renderCell'] = (params) => {
 // {created_at: 1680541318865,id:"jzWXPdekM01YCfKJsm6a", meaning: "사과", spelling: "apple"},
 // ];
 
-export default function WordTable({rows,bookId,apiRef}) {
-  const [isOpenModal,setIsOpenModal] = useState(null);
+export interface Word extends DocumentData {
+  id?: string;
+  created_at?: number;
+  meaning?: string;
+  rating?: number;
+  spelling?: string;
+}
+
+export default function WordTable({
+  rows,
+  bookId,
+  apiRef
+}:{
+  rows:Word[] | undefined,
+  bookId:string,
+  apiRef:React.MutableRefObject<GridApiCommunity>
+  }
+  ) {
+  const [isOpenModal,setIsOpenModal] = useState<GridValidRowModel | null>(null);
   const [snackbar, setSnackbar] = React.useState<Pick<
   AlertProps,
   "children" | "severity"
@@ -72,7 +90,7 @@ const [ columns,setColumns ] = useState<GridColDef[]>([])
   const handleCloseSnackbar = () => setSnackbar(null);
 
 
-  const processRowUpdate = async(newRow,prevRow) => {
+  const processRowUpdate = async(newRow: any,prevRow:any) => {
     console.log(newRow)
     const response = await updateWord({
       bookId, 
@@ -90,7 +108,7 @@ const [ columns,setColumns ] = useState<GridColDef[]>([])
     setSnackbar({ children: error.message, severity: "error" });
   }
 
-  const addColumn = (col) => {
+  const addColumn = (col:GridColDef) => {
     columns.push(col)
   }
 
@@ -149,7 +167,7 @@ const [ columns,setColumns ] = useState<GridColDef[]>([])
     if(!isOpenModal) return
 
     console.log(isOpenModal.id) 
-    const allRows = apiRef.current.getSortedRows(apiRef) 
+    const allRows = apiRef.current.getSortedRows() 
     const index = allRows.findIndex((row) => row.id === isOpenModal.id);
 
     if(index < 0) return
@@ -166,7 +184,7 @@ const [ columns,setColumns ] = useState<GridColDef[]>([])
     if(!isOpenModal) return
 
     console.log(isOpenModal.id) 
-    const allRows = apiRef.current.getSortedRows(apiRef) 
+    const allRows = apiRef.current.getSortedRows() 
     const index = allRows.findIndex((row) => row.id === isOpenModal.id);
 
     console.log(index,allRows.length)
@@ -193,7 +211,7 @@ const [ columns,setColumns ] = useState<GridColDef[]>([])
         onRowSelectionModelChange={(ids) => {
           const selectedIDs = new Set(ids);
           const selectedRowData = rows.filter((row) =>
-          selectedIDs.has(row.id.toString())
+          selectedIDs.has(row.id!.toString())
           );
           console.log(selectedRowData)
         }}
@@ -253,6 +271,8 @@ import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Grid';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import { DocumentData } from 'firebase/firestore';
+import { GridApiCommunity } from '@mui/x-data-grid/internals';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -275,26 +295,34 @@ export function FullScreenDialog({
   setSnackbar,
   handleNextWord,
   handlePrevWord
+}:{
+  bookId:string,
+  handleClose: () => void,
+  data:GridValidRowModel ,
+  setSnackbar:React.Dispatch<React.SetStateAction<Pick<AlertProps, "children" | "severity"> | null>>,
+  handleNextWord: () => void,
+  handlePrevWord: () => void
 }) {
   const open = Boolean(data)
   const [spellingInput, setSpellingInput] = useState(data.spelling);
   const [meaningInput, setMeaningInput] = useState(data.meaning);
-  const [ratingInput, setRatingInput] = useState(+data.rating);
+  const [ratingInput, setRatingInput] = useState<number | null>(+data.rating);
 
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    console.log(formData.get('spelling')?.toString())
-    console.log(formData.get('meaning')?.toString())
-    console.log(formData.get('rating')?.toString())
+    const spelling = formData.get('spelling')?.toString();
+    const meaning = formData.get('meaning')?.toString();
+    const rating = Number(formData.get('rating'));
+    const newWord = {bookId:bookId, wordId: data.id};
 
     const response = await updateWord({
       bookId, 
       wordId: data.id,
-      spelling: formData.get('spelling')?.toString(),
-      meaning: formData.get('meaning')?.toString(),
-      rating: formData.get('rating')?.toString()
+      spelling:spelling,
+      meaning: meaning,
+      rating: rating
     });
     setSnackbar({ children: "변경사항이 저장되었습니다.", severity: "success" });
   }
@@ -305,8 +333,8 @@ export function FullScreenDialog({
     setRatingInput(data.rating)
   },[data])
 
-  const onChangeMeaningInput = (e) => {
-    const newValue = e.target.value
+  const onChangeMeaningInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = event.target.value
 
     if(newValue.length > 100) {
       setMeaningInput(newValue.slice(0,100))

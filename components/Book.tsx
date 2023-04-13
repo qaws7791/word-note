@@ -7,8 +7,9 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import BookMenu from "./BookMenu";
 import FormDialog from "./FormDialog";
+import { DocumentData } from "firebase/firestore";
 
-export default function Book({data}) {
+export default function Book({data}:{data:DocumentData}) {
   const {user} = useAuthContext();
   const [inputBookName, setInputBookName] = useState(data.bookName);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -21,8 +22,8 @@ export default function Book({data}) {
     setInputBookName(e.target.value);
   }
 
-  function handleUpdateBook (id){
-    return async function (bookName) {
+  function handleUpdateBook (id:string){
+    return async function (bookName:string) {
         await updateBook({
           bookName:bookName, 
           id: id

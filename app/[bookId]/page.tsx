@@ -5,7 +5,7 @@ import { collection,onSnapshot,DocumentData, doc,getDoc } from 'firebase/firesto
 import { useState,useEffect } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
 import Box from '@mui/material/Box';
-import WordTable from '@/components/WordTable';
+import WordTable, { Word } from '@/components/WordTable';
 import BasicSpeedDial from '@/components/BasicSpeedDial';
 import AddIcon from '@mui/icons-material/Add';
 import PlaylistRemoveIcon from '@mui/icons-material/PlaylistRemove';
@@ -21,7 +21,7 @@ export default function BookPage({
   const {user} = useAuthContext();
   const {setTitle} = useTitleContext();
   const apiRef = useGridApiRef();
-  const [words, setWords] = useState<DocumentData | undefined>();
+  const [words, setWords] = useState<Word[]>();
   const [bookData, setBookData] = useState<DocumentData | undefined>();
   
   useEffect(() => {
@@ -56,19 +56,23 @@ export default function BookPage({
   const getBookData = async () => {
     const docRef = await getBook(params.bookId);
     const docData =  await docRef.data();
-    docData.id = docRef.id;
-    setBookData(docData)
-    console.log(bookData)
+    if(docData){
+      docData.id = docRef.id;
+      setBookData(docData)
+      console.log(bookData)
+    }
   }
+
+
 
   
 
   useEffect(() => {
     getBookData()
     const unsubscribe = onSnapshot(collection(db, 'books',params.bookId,'words'), (querySnapshot) => {
-      const words = [];
+      const words:Word[] = [];
       querySnapshot.forEach((word) => {
-        const data = word.data()
+        const data:Word = word.data()
         data.id= word.id;
         words.push(data);
         
@@ -119,35 +123,3 @@ export default function BookPage({
 
 
 
-export function WordDetail ({bookId,wordId}:{bookId:string,wordId:string}) {
-  const [wordData, setWordData] = useState<DocumentData | undefined>();
-
-
-  async function getWordData() {
-    const docRef = doc(db,'books',bookId,'words',wordId);
-    const docSnap = await getDoc(docRef);
-  
-    if (docSnap.exists()) {
-      console.log("Document data:", docSnap.data());
-      setWordData(docSnap.data())
-    } else {
-      // doc.data() will be undefined in this case
-      console.log("No such document!");
-    }
-  }
-
-  useEffect(() => {
-    if(bookId && wordId) {
-      console.log(bookId,wordId)
-      getWordData()
-    }
-    
-  },[bookId,wordId])
-
-  if(!wordId) return <div>선택된 아이템이 없습니다.</div>
-
-  return (
-    <div>{wordData && <div>{wordData.spelling}: {wordData.meaning}</div>}</div>
-    
-  )
-}

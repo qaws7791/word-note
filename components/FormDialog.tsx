@@ -7,7 +7,17 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-export default function FormDialog({handleClick, open, setOpen,initialValue}) {
+export default function FormDialog({
+  handleClick, 
+  open, 
+  setOpen,
+  initialValue
+}:{
+  handleClick:Function,
+  open:boolean,
+  setOpen:React.Dispatch<React.SetStateAction<boolean>>,
+  initialValue:string
+}) {
   const [input, setInput] = React.useState(initialValue)
   console.log(handleClick)
 
