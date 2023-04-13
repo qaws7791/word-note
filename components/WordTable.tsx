@@ -118,15 +118,18 @@ const [ columns,setColumns ] = useState<GridColDef[]>([])
         field: 'rating',
         headerName: '난이도',
         description:'난이도',
+        headerAlign: 'center',
         renderCell: renderRating,
         renderEditCell: renderRatingEditInputCell,
         editable: true,
         width: 150,
         type: 'number',
+
       },
       {
         field: "change",
         headerName: "수정",
+        headerAlign: 'center',
         width: 90,
         renderCell: (params) => {
           console.log('params:',params)
