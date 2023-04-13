@@ -6,7 +6,7 @@ import auth from "@/net/auth";
 
 interface ContextProps {
   user: User | null,
-  setUser: Dispatch<SetStateAction<object>>
+  setUser: Dispatch<SetStateAction<User | null>>
 }
 
 const AuthContext = createContext<ContextProps>({
@@ -14,7 +14,7 @@ const AuthContext = createContext<ContextProps>({
   setUser: () => {},
 });
 
-export const AuthContextProvider = ({ children }) => {
+export const AuthContextProvider = ({ children }:{children:any}) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setLoading] = useState(true);
   

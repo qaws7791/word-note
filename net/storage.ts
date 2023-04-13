@@ -4,7 +4,7 @@ import { v4 } from "uuid";
 
 const storage = getStorage(firebaseApp);
 
-export const uploadImage = async(file) => {
+export const uploadImage = async(file:File) => {
   const imageRef = ref(storage, `images/userProfile/${file.name + v4() }`);
   await uploadBytes(imageRef, file);
   const response = await getDownloadURL(imageRef);

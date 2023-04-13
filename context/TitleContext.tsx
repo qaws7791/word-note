@@ -12,7 +12,7 @@ const TitleContext = createContext<ContextProps>({
   setTitle: () => '',
 });
 
-export const TitleContextProvider = ({ children }) => {
+export const TitleContextProvider = ({ children }:{children:any}) => {
   const [title, setTitle] = useState<string>('');
   
   useEffect(() => {
