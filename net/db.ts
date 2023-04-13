@@ -41,14 +41,7 @@ interface CreateWordParams {
 
 
 
-export const createPost = async ({subject, content}:CreatePostParams):Promise<DocumentReference> => {
-  return await addDoc(collection(db, "articles"), {
-    subject,
-    content,
-    author:"김철수",
-    created_at: new Date().getTime(),
-  });
-}
+
 
 export const createBook = async ({authorName, bookName,userId}:CreateBookParams):Promise<DocumentReference> => {
   return await addDoc(collection(db, "books"), {
@@ -61,7 +54,8 @@ export const createBook = async ({authorName, bookName,userId}:CreateBookParams)
 
 
 export const getBooksAll = async({uid}: GetBooksAllParams):Promise<QuerySnapshot<DocumentData>> => {
-  return await getDocs(query( collection(db, 'books'),where("uid", "==",uid)))
+  const q = query( collection(db, 'books'),where("userId", "==",uid));
+  return await getDocs(q)
 }
 
 export const createWord = async ({spelling, meaning,bookId,rating}:CreateWordParams):Promise<DocumentReference> => {
