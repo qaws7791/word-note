@@ -354,7 +354,7 @@ export function FullScreenDialog({
         onClose={handleClose}
         TransitionComponent={Transition}
       >
-      <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1}}>
+      <Box component="form" onSubmit={handleSubmit} noValidate>
         <AppBar sx={{ position: 'relative' }}>
           <Toolbar>
             <IconButton
