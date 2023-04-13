@@ -1,6 +1,6 @@
 "use client";
 import { ReactElement } from "react";
-import { signIn, signInWithGoogle } from "@/net/auth";
+import { signIn, signInGoogleRedirect, signInWithGoogle } from "@/net/auth";
 import { useAuthContext } from "@/context/AuthContext";
 import { useRouter } from 'next/navigation';
 import NextLink from "next/link";
@@ -39,6 +39,16 @@ export default function LoginForm(): ReactElement {
       console.log('Login Error', e.message);
     }
   };
+
+  const handleGoogle = async() => {
+    try{
+      const user =await signInWithGoogle();
+      setUser(user)
+    } catch(e: any) {
+      console.log('Login Error', e.message);
+    }
+  }
+
 
   return (
     <Box
@@ -93,7 +103,7 @@ export default function LoginForm(): ReactElement {
               </Grid>
       </Grid>
       <Divider sx={{margin:'20px 0px'}}>OR</Divider>
-      <GoogleButton onClick={signInWithGoogle}/>
+      <GoogleButton onClick={handleGoogle}/>
 
 
     </Box>
