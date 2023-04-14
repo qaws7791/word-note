@@ -45,9 +45,7 @@ export const logout = async ():Promise<void> => {
 
 const provider = new GoogleAuthProvider();
 
-export const signInGoogleRedirect = () => {
-  signInWithRedirect(auth, provider).then((result) => result.user);
-}
+
 
 export const signInWithGoogle = async () => {
   const {user} = await signInWithPopup(auth, provider)

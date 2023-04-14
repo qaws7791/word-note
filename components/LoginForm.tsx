@@ -1,6 +1,6 @@
 "use client";
 import { ReactElement } from "react";
-import { signIn, signInGoogleRedirect, signInWithGoogle } from "@/net/auth";
+import { signIn, signInWithGoogle } from "@/net/auth";
 import { useAuthContext } from "@/context/AuthContext";
 import { useRouter } from 'next/navigation';
 import NextLink from "next/link";
