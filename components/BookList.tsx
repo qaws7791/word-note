@@ -1,6 +1,6 @@
 import React from 'react'
 import Book from './Book'
-import { List } from '@mui/material'
+import { List, ListItem, Typography } from '@mui/material'
 import { DocumentData } from 'firebase/firestore'
 
 export default function BookList({books}:{books:DocumentData[]| undefined}) {
@@ -13,7 +13,7 @@ export default function BookList({books}:{books:DocumentData[]| undefined}) {
   return (
     <List sx={{border: '1px solid #ddd', borderRadius: '6px'}}>
 
-      {books ? books.map(item => <Book key={item.id} data={item}/> ): 'No Books'}
+      {books ? books.map(item => <Book key={item.id} data={item}/> ): <ListItem><Typography>No Books</Typography></ListItem>}
     </List>
   )
 }

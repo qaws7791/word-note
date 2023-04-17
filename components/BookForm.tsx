@@ -66,7 +66,7 @@ export default function BookForm() {
         position:'relative',
       }}>
 
-        <Tooltip title="New Note">
+        <Tooltip title="New Book">
         <IconButton 
           size='large'
           aria-label="add" 
