@@ -15,6 +15,7 @@ export default function UserPage() {
   if(!user) {redirect('/')}
 
   return (
-      <BookForm/>
+    <BookForm/>
+      
   )
 }

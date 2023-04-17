@@ -1,6 +1,6 @@
 "use client"
 import { Container, CssBaseline,createTheme,ThemeProvider } from '@mui/material';
-import './globals.css'
+import '../globals.css'
 import { AuthContextProvider } from "@/context/AuthContext";
 import ProfileAppBar from '@/components/ProfileAppBar';
 import { TitleContextProvider } from '@/context/TitleContext';
