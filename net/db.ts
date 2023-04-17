@@ -1,3 +1,4 @@
+import { v4 } from "uuid";
 import firebaseApp from "./firebase";
 import { 
   getFirestore,
@@ -49,6 +50,8 @@ export const createBook = async ({authorName, bookName,userId}:CreateBookParams)
     bookName,
     userId,
     created_at: new Date().getTime(),
+    public_url: v4(),
+    is_shared: false,
   });
 }
 
@@ -58,14 +61,7 @@ export const getBooksAll = async({uid}: GetBooksAllParams):Promise<QuerySnapshot
   return await getDocs(q)
 }
 
-export const createWord = async ({spelling, meaning,bookId,rating}:CreateWordParams):Promise<DocumentReference> => {
-  return await addDoc(collection(db, 'books',bookId,'words'), {
-    spelling,
-    meaning,
-    rating,
-    created_at: new Date().getTime(),
-  });
-}
+
 
 export const deleteBook =async (id:string) => {
   return deleteDoc(doc(db, 'books',id));
@@ -75,11 +71,26 @@ export const updateBook =async ({bookName,id}:{bookName:string, id:string}) => {
   return await updateDoc(doc(db, 'books',id), {
         bookName
     });
-  
+}
+
+export const updateBookShareState =async ({is_shared,id}:{is_shared:boolean, id:string}) => {
+  return await updateDoc(doc(db, 'books',id), {
+    is_shared
+    });
 }
 
 export const getBook =async (id:string) => {
   return await getDoc(doc(db, 'books',id));
+}
+
+export const createWord = async ({spelling, meaning,bookId,rating}:CreateWordParams):Promise<DocumentReference> => {
+  return await addDoc(collection(db, 'books',bookId,'words'), {
+    spelling,
+    meaning,
+    rating,
+    created_at: new Date().getTime(),
+
+  });
 }
 
 export const getWord = async ({bookId,wordId}:{bookId:string, wordId:string}) => {
@@ -91,6 +102,7 @@ export const getWordData = async ({bookId,wordId}:{bookId:string, wordId:string}
 
   return {id: dataRef.id, ...dataRef.data()}
 }
+
 
 export const updateWord = async({
   bookId,
@@ -115,6 +127,39 @@ export const updateWord = async({
 
 export const deleteWord =async ({bookId,wordId}:{bookId:string, wordId:string}) => {
   return deleteDoc(doc(db,'books',bookId,'words',wordId));
+}
+
+export const getPublicBook =async (url:string) => {
+  const q = query(collection(db, "books"), where("public_url", "==", url));
+  const querySnapshot = await getDocs(q);
+  
+  const result = []
+  querySnapshot.forEach((doc) => {
+    const data = doc.data()
+    console.log(data['is_shared'])
+    if(data['is_shared'] !== true) {
+      console.log('not true')
+      return 
+    }
+    data.id = doc.id
+    console.log(data)
+    result.push(data)
+  });
+  return result
+}
+
+export const getPublicWords = async(bookId: string) => {
+  console.log(bookId)
+  const querySnapshot = await getDocs(collection(db, 'books',bookId,'words'));
+
+  const words = [];
+  querySnapshot.forEach((word) => {
+    const data = word.data()
+    data.id= word.id;
+    words.push(data);
+  });
+    
+  return words
 }
 
 export default db;
