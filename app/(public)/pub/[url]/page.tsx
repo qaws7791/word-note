@@ -1,7 +1,5 @@
 import { getPublicBook, getPublicWords } from '@/net/db'
-import { Rating } from '@mui/material'
 import React from 'react'
-import StarIcon from '@mui/icons-material/Star';
 import styles from './page.module.css'
 
 const formatDate = (timestamp:number):string => {
@@ -17,7 +15,7 @@ const formatDate = (timestamp:number):string => {
 }
 
 
-export default async function page({params}) {
+export default async function page({params}:{params:{url:string}}) {
   
   
   console.log('hi')
@@ -57,7 +55,7 @@ export default async function page({params}) {
   )
 }
 
-const getData = async(url)=> {
+const getData = async(url:string)=> {
   return await getPublicBook(url);
 }
 
@@ -65,7 +63,7 @@ const getWords = async(bookId:string) => {
   return await getPublicWords(bookId)
 }
 
-function StarRating({ rating }) {
+function StarRating({ rating }:{rating:number}) {
   let stars = [];
   for (let i = 1; i <= rating; i++) {
     stars.push(<div style={{width:'24px',height:'24px', display:'inline-block'}}>
