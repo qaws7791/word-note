@@ -129,11 +129,11 @@ export const deleteWord =async ({bookId,wordId}:{bookId:string, wordId:string}) 
   return deleteDoc(doc(db,'books',bookId,'words',wordId));
 }
 
-export const getPublicBook =async (url:string) => {
+export const getPublicBook = async (url:string):Promise<DocumentData[]> => {
   const q = query(collection(db, "books"), where("public_url", "==", url));
   const querySnapshot = await getDocs(q);
   
-  const result = []
+  const result:DocumentData[] = []
   querySnapshot.forEach((doc) => {
     const data = doc.data()
     console.log(data['is_shared'])
@@ -148,11 +148,11 @@ export const getPublicBook =async (url:string) => {
   return result
 }
 
-export const getPublicWords = async(bookId: string) => {
+export const getPublicWords = async(bookId: string):Promise<DocumentData> => {
   console.log(bookId)
   const querySnapshot = await getDocs(collection(db, 'books',bookId,'words'));
 
-  const words = [];
+  const words:DocumentData[] = [];
   querySnapshot.forEach((word) => {
     const data = word.data()
     data.id= word.id;
