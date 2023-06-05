@@ -14,6 +14,13 @@ const formatDate = (timestamp:number):string => {
   return `${year}년 ${month}월 ${date}일 ${hours}:${minutes}:${seconds}`;
 }
 
+interface word {
+  id: number;
+  created_at: number;
+  meaning: string;
+  rating: number;
+  spelling: string;
+}
 
 export default async function page({params}:{params:{url:string}}) {
   
@@ -40,7 +47,7 @@ export default async function page({params}:{params:{url:string}}) {
           </tr>
         </thead>
         <tbody>
-          {words.map((word) => 
+          {words.map((word:word) => 
             <tr key={word.id}>
                 <td>{word.spelling}</td>
                 <td>{word.meaning}</td>
